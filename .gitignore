@@ -43,6 +43,8 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+*.txt
+
 
 Optional: Uncomment if you're using Visual Studio Code
 .vscode/*
