@@ -1,4 +1,5 @@
 import { useRef, useCallback } from "react";
+import PropTypes from "prop-types";
 import Webcam from "react-webcam";
 import { CameraIcon } from "@heroicons/react/24/solid";
 
@@ -26,6 +27,10 @@ const Camera = ({ onCapture }) => {
       </button>
     </div>
   );
+};
+
+Camera.propTypes = {
+  onCapture: PropTypes.func.isRequired,
 };
 
 export default Camera;

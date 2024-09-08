@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
 
 const ParkingStatus = ({ interpretation }) => {
@@ -20,6 +21,10 @@ const ParkingStatus = ({ interpretation }) => {
       <p className="text-gray-600 text-center">{interpretation}</p>
     </div>
   );
+};
+
+ParkingStatus.propTypes = {
+  interpretation: PropTypes.string.isRequired,
 };
 
 export default ParkingStatus;
