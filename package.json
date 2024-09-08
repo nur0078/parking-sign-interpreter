@@ -3,13 +3,16 @@
     "version": "1.0.0",
     "description": "An app to interpret parking signs using LLM",
     "scripts": {
-      "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
-      "start:frontend": "cd frontend && npm run dev",
-      "start:backend": "cd backend && npm run dev",
-      "install": "concurrently \"cd frontend && npm install\" \"cd backend && npm install\"",
-      "build": "cd frontend && npm run build"
+        "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
+        "start:frontend": "cd frontend && npm run dev",
+        "start:backend": "cd backend && npm run dev",
+        "install": "concurrently \"cd frontend && npm install\" \"cd backend && npm install\"",
+        "build": "cd frontend && npm run build"
     },
     "devDependencies": {
-      "concurrently": "^8.0.1"
+        "concurrently": "^8.0.1"
+    },
+    "dependencies": {
+        "axios": "^1.7.7"
     }
-  }
+}
