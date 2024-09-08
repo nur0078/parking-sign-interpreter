@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 
-app.use("/api", signInterpreterRoutes);
+app.use("/api", signInterpreterRoutes); // Route prefix
 
 app.use(errorHandler);
 
