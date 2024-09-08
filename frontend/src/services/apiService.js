@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3000/api";
+const API_URL =
+  import.meta.env.VITE_BACKEND_API_URL || "http://localhost:3000/api";
 
 export const interpretParkingSign = async (imageData) => {
   try {
