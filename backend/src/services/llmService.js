@@ -1,5 +1,5 @@
 const axios = require("axios"); // Import axios
-const { LLM_API_KEY, LLM_API_URL } = require("../config/env");
+const { LLM_API_KEY, LLM_API_URL, PROMPT } = require("../config/env");
 
 class LLMService {
   async interpretParkingSign(imageBase64, currentDateTime) {
@@ -14,7 +14,7 @@ class LLMService {
               content: [
                 {
                   type: "text",
-                  text: `Interpret the parking sign in this image. The current date and time is ${currentDateTime}. Provide a clear, concise explanation of whether parking is allowed, any time restrictions, and any other relevant details.`,
+                  text: `${PROMPT} the current date and time, that is ${currentDateTime}.`,
                 },
                 {
                   type: "image_url",
