@@ -103,7 +103,13 @@ function App() {
       onClick={onClick}
       variant="outline"
       icon={Icon}
-      className="w-full p-4 mb-3"
+      className="w-full p-4 mb-3 rounded-xl"
+      style={{
+        background: "white",
+        borderWidth: "2px",
+        borderColor: "rgb(219 234 254)",
+        fontSize: "1rem",
+      }}
     >
       {label}
     </Button>
