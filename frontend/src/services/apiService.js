@@ -1,7 +1,8 @@
 import axios from "axios";
 
+// Use your computer's local IP address for mobile testing
 const API_URL =
-  import.meta.env.VITE_BACKEND_API_URL || "http://localhost:3000/api";
+  import.meta.env.VITE_BACKEND_API_URL || "http://192.168.1.7:3000/api";
 
 const validateImageData = (imageData) => {
   if (!imageData) {
