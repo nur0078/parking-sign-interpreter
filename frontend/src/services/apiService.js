@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getCurrentDateTime } from "../utils/dateTime";
 
 // Use your computer's local IP address for mobile testing
 const API_URL =
@@ -33,20 +34,6 @@ export const interpretParkingSign = async (imageData) => {
     // Validate image data
     validateImageData(imageData);
 
-    // Get current date and time from device
-    const now = new Date();
-    const currentDateTime = {
-      dayOfWeek: now.getDay(),
-      hour: now.getHours(),
-      minute: now.getMinutes(),
-      date: now.toLocaleDateString(),
-      time: now.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      }),
-    };
-
     const requestConfig = {
       headers: {
         "Content-Type": "application/json",
@@ -65,7 +52,7 @@ export const interpretParkingSign = async (imageData) => {
       `${API_URL}/interpret-sign`,
       {
         image: imageData,
-        currentDateTime,
+        currentDateTime: getCurrentDateTime(),
       },
       requestConfig
     );
