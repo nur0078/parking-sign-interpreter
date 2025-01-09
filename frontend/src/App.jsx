@@ -3,6 +3,9 @@ import PropTypes from "prop-types";
 import Camera from "./components/Camera";
 import ParkingStatus from "./components/ParkingStatus";
 import { interpretParkingSign } from "./services/apiService";
+import { formatDateTime } from "./utils/dateTime";
+import { Button } from "./components/common/Button";
+import { Card } from "./components/common/Card";
 import {
   XCircleIcon,
   PhotoIcon,
@@ -41,30 +44,15 @@ function App() {
     return () => clearInterval(timer);
   }, []);
 
-  // Format current date and time
-  const formatDateTime = (date) => {
-    const options = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true,
-    };
-    return date.toLocaleString("en-US", options);
-  };
-
   const CurrentDateTime = () => (
-    <div className="bg-white p-4 rounded-xl shadow-lg mt-4">
+    <Card className="mt-4">
       <div className="flex items-center justify-center space-x-2">
         <ClockIcon className="h-5 w-5 text-blue-500" />
         <p className="text-gray-700 font-medium">
           {formatDateTime(currentDateTime)}
         </p>
       </div>
-    </div>
+    </Card>
   );
 
   const handleCapture = async (imageSrc) => {
@@ -100,17 +88,31 @@ function App() {
         <XCircleIcon className="h-5 w-5 text-red-500 mr-2" />
         <p className="text-red-700">{message}</p>
       </div>
-      <button
-        onClick={handleReset}
-        className="mt-3 text-sm text-red-600 hover:text-red-500"
-      >
+      <Button onClick={handleReset} variant="error" className="mt-3 text-sm">
         Try Again
-      </button>
+      </Button>
     </div>
   );
 
   ErrorMessage.propTypes = {
     message: PropTypes.string.isRequired,
+  };
+
+  const UploadButton = ({ icon: Icon, label, onClick }) => (
+    <Button
+      onClick={onClick}
+      variant="outline"
+      icon={Icon}
+      className="w-full p-4 mb-3"
+    >
+      {label}
+    </Button>
+  );
+
+  UploadButton.propTypes = {
+    icon: PropTypes.elementType.isRequired,
+    label: PropTypes.string.isRequired,
+    onClick: PropTypes.func.isRequired,
   };
 
   const MobileUpload = () => {
@@ -183,22 +185,6 @@ function App() {
         setUploadStatus("error");
         setError("Failed to process the image. Please try again.");
       }
-    };
-
-    const UploadButton = ({ icon: Icon, label, onClick }) => (
-      <button
-        onClick={onClick}
-        className="flex items-center justify-center w-full p-4 mb-3 bg-white border-2 border-blue-100 rounded-xl hover:bg-blue-50 transition-colors"
-      >
-        <Icon className="h-6 w-6 text-blue-500 mr-2" />
-        <span className="text-blue-700 font-medium">{label}</span>
-      </button>
-    );
-
-    UploadButton.propTypes = {
-      icon: PropTypes.elementType.isRequired,
-      label: PropTypes.string.isRequired,
-      onClick: PropTypes.func.isRequired,
     };
 
     return (
@@ -276,22 +262,22 @@ function App() {
                 {isMobile ? (
                   <MobileUpload />
                 ) : (
-                  <div className="bg-white p-6 rounded-xl shadow-lg">
+                  <Card>
                     <Camera onCapture={handleCapture} />
-                  </div>
+                  </Card>
                 )}
                 <CurrentDateTime />
               </>
             ) : (
               <div className="space-y-6">
                 {!isMobile && (
-                  <div className="bg-white p-4 rounded-xl shadow-lg">
+                  <Card>
                     <img
                       src={capturedImage}
                       alt="Captured parking sign"
                       className="max-w-md mx-auto rounded-lg"
                     />
-                  </div>
+                  </Card>
                 )}
 
                 {isLoading ? (
@@ -306,12 +292,12 @@ function App() {
                       requestTime={requestTime}
                     />
                     <div className="text-center">
-                      <button
+                      <Button
                         onClick={handleReset}
-                        className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300 shadow-md"
+                        className="px-6 py-2 rounded-full"
                       >
                         Scan Another Sign
-                      </button>
+                      </Button>
                     </div>
                   </>
                 )}
