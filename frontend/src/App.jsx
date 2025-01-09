@@ -174,13 +174,14 @@ function App() {
             <div className="space-y-3">
               <UploadButton
                 icon={PhotoIcon}
-                label="Choose from Library"
+                label="Upload Photo"
                 onClick={() => {
+                  // On mobile, this will show the standard interface with
+                  // "Photo Library", "Take Photo", and "Choose File" options
                   const input = document.createElement("input");
                   input.type = "file";
                   input.accept = "image/*";
-                  input.removeAttribute("capture");
-                  input.setAttribute("capture", "false");
+                  // Don't set any capture attribute to get the standard interface
                   input.onchange = (e) => handleFileSelect(e.target.files[0]);
                   input.click();
                 }}
