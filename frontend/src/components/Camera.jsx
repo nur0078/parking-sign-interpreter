@@ -7,7 +7,19 @@ function Camera({ onCapture }) {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
+    const isMobileDevice = () => {
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+        userAgent.toLowerCase()
+      );
+    };
+
     const initializeCamera = async () => {
+      // Don't initialize camera on mobile devices
+      if (isMobileDevice()) {
+        return;
+      }
+
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: "environment" },
@@ -24,7 +36,6 @@ function Camera({ onCapture }) {
 
     initializeCamera();
 
-    // Cleanup function to stop the camera when component unmounts
     return () => {
       if (streamRef.current) {
         const tracks = streamRef.current.getTracks();
@@ -32,7 +43,7 @@ function Camera({ onCapture }) {
         streamRef.current = null;
       }
     };
-  }, []); // Empty dependency array means this runs once on mount
+  }, []);
 
   const handleCapture = () => {
     if (!videoRef.current || !isInitialized) return;
@@ -44,7 +55,6 @@ function Camera({ onCapture }) {
     ctx.drawImage(videoRef.current, 0, 0);
     const imageData = canvas.toDataURL("image/jpeg");
 
-    // Stop the camera stream after capturing
     if (streamRef.current) {
       const tracks = streamRef.current.getTracks();
       tracks.forEach((track) => track.stop());
