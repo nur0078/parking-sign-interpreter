@@ -6,6 +6,21 @@ function Camera({ onCapture }) {
   const streamRef = useRef(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  const stopStream = () => {
+    if (streamRef.current) {
+      const tracks = streamRef.current.getTracks();
+      tracks.forEach((track) => {
+        track.stop();
+        streamRef.current.removeTrack(track);
+      });
+      streamRef.current = null;
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
+      }
+      setIsInitialized(false);
+    }
+  };
+
   useEffect(() => {
     const isMobileDevice = () => {
       const userAgent = navigator.userAgent || navigator.vendor || window.opera;
@@ -36,12 +51,9 @@ function Camera({ onCapture }) {
 
     initializeCamera();
 
+    // Cleanup function
     return () => {
-      if (streamRef.current) {
-        const tracks = streamRef.current.getTracks();
-        tracks.forEach((track) => track.stop());
-        streamRef.current = null;
-      }
+      stopStream();
     };
   }, []);
 
@@ -55,11 +67,8 @@ function Camera({ onCapture }) {
     ctx.drawImage(videoRef.current, 0, 0);
     const imageData = canvas.toDataURL("image/jpeg");
 
-    if (streamRef.current) {
-      const tracks = streamRef.current.getTracks();
-      tracks.forEach((track) => track.stop());
-      streamRef.current = null;
-    }
+    // Stop the stream immediately after capturing
+    stopStream();
 
     onCapture(imageData);
   };

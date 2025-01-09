@@ -179,6 +179,8 @@ function App() {
                   const input = document.createElement("input");
                   input.type = "file";
                   input.accept = "image/*";
+                  input.removeAttribute("capture");
+                  input.setAttribute("capture", "false");
                   input.onchange = (e) => handleFileSelect(e.target.files[0]);
                   input.click();
                 }}
