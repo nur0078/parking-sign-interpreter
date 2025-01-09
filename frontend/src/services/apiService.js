@@ -24,18 +24,14 @@ const validateImageData = (imageData) => {
 
 export const interpretParkingSign = async (base64Image) => {
   try {
-    // Get current device date and time
+    // Get current date and time from device
     const now = new Date();
     const currentDateTime = {
       dayOfWeek: now.getDay(),
       hour: now.getHours(),
       minute: now.getMinutes(),
       date: now.toLocaleDateString(),
-      time: now.toLocaleTimeString([], {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      }),
+      time: now.toLocaleTimeString(),
     };
 
     const response = await fetch(`${API_URL}/interpret-sign`, {
@@ -55,8 +51,7 @@ export const interpretParkingSign = async (base64Image) => {
       );
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
     console.error("API Error:", error);
     throw new Error(

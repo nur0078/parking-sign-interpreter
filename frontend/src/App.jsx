@@ -8,7 +8,6 @@ import {
   PhotoIcon,
   CheckCircleIcon,
   ClockIcon,
-  CalendarIcon,
 } from "@heroicons/react/24/solid";
 
 function App() {
@@ -18,6 +17,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [error, setError] = useState(null);
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
 
   useEffect(() => {
     const checkMobile = () => {
@@ -31,6 +31,41 @@ function App() {
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  useEffect(() => {
+    // Update current time every second
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Format current date and time
+  const formatDateTime = (date) => {
+    const options = {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    };
+    return date.toLocaleString("en-US", options);
+  };
+
+  const CurrentDateTime = () => (
+    <div className="bg-white p-4 rounded-xl shadow-lg mt-4">
+      <div className="flex items-center justify-center space-x-2">
+        <ClockIcon className="h-5 w-5 text-blue-500" />
+        <p className="text-gray-700 font-medium">
+          {formatDateTime(currentDateTime)}
+        </p>
+      </div>
+    </div>
+  );
 
   const handleCapture = async (imageSrc) => {
     setError(null);
@@ -215,46 +250,6 @@ function App() {
               )}
             </div>
           )}
-        </div>
-      </div>
-    );
-  };
-
-  const CurrentDateTime = () => {
-    const [dateTime, setDateTime] = useState(new Date());
-
-    useEffect(() => {
-      const timer = setInterval(() => {
-        setDateTime(new Date());
-      }, 1000);
-
-      return () => clearInterval(timer);
-    }, []);
-
-    const formattedDate = dateTime.toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-
-    const formattedTime = dateTime.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
-
-    return (
-      <div className="bg-white p-4 rounded-xl shadow-lg">
-        <div className="flex flex-col items-center space-y-2">
-          <div className="flex items-center text-gray-600 mb-1">
-            <CalendarIcon className="h-5 w-5 mr-2 text-blue-500" />
-            <span className="text-sm font-medium">{formattedDate}</span>
-          </div>
-          <div className="flex items-center text-gray-600">
-            <ClockIcon className="h-5 w-5 mr-2 text-blue-500" />
-            <span className="text-2xl font-semibold">{formattedTime}</span>
-          </div>
         </div>
       </div>
     );

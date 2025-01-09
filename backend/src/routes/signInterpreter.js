@@ -70,29 +70,61 @@ router.get("/test-interpretation", async (req, res, next) => {
 // Original endpoint
 router.post("/interpret-sign", async (req, res, next) => {
   try {
-    const { image, currentDateTime } = req.body;
+    console.log("📥 Received image interpretation request");
+    const { image } = req.body;
 
-    if (!image) {
-      throw new Error("No image provided");
+    try {
+      validateImage(image);
+    } catch (validationError) {
+      console.error("❌ Image validation failed:", validationError.message);
+      const error = new Error(validationError.message);
+      error.statusCode = 400;
+      throw error;
     }
 
-    if (!currentDateTime) {
-      throw new Error("No date/time information provided");
-    }
+    const currentDateTime = new Date();
+    const formattedDateTime = {
+      dayOfWeek: currentDateTime.getDay(),
+      hour: currentDateTime.getHours(),
+      minute: currentDateTime.getMinutes(),
+      date: currentDateTime.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }),
+      time: currentDateTime.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      }),
+    };
 
-    const llmService = new LLMService();
-    const interpretation = await llmService.interpretParkingSign(
+    console.log("⏰ Current DateTime:", formattedDateTime);
+    console.log("🔍 Processing image...");
+
+    const interpretation = await LLMService.interpretParkingSign(
       image,
-      currentDateTime
+      formattedDateTime
     );
+
+    console.log("✅ Successfully interpreted parking sign");
 
     res.json({
       success: true,
       interpretation,
-      timestamp: new Date().toISOString(),
-      requestTime: currentDateTime,
+      timestamp: currentDateTime.toISOString(),
+      requestTime: formattedDateTime,
     });
   } catch (error) {
+    console.error("❌ Error processing request:", {
+      message: error.message,
+      statusCode: error.statusCode || 500,
+    });
+
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+
     next(error);
   }
 });
