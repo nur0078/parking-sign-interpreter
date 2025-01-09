@@ -22,87 +22,45 @@ const validateImageData = (imageData) => {
   return true;
 };
 
-export const interpretParkingSign = async (imageData) => {
+export const interpretParkingSign = async (base64Image) => {
   try {
-    console.log("🚀 API Request Details:", {
-      endpoint: `${API_URL}/interpret-sign`,
-      dataLength: imageData?.length || 0,
-      mimeType: imageData?.split(";")[0] || "unknown",
-    });
+    // Get current device date and time
+    const now = new Date();
+    const currentDateTime = {
+      dayOfWeek: now.getDay(),
+      hour: now.getHours(),
+      minute: now.getMinutes(),
+      date: now.toLocaleDateString(),
+      time: now.toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      }),
+    };
 
-    // Validate image data
-    validateImageData(imageData);
-
-    // Log image data size for debugging
-    const sizeInKB = Math.round(imageData.length / 1024);
-    console.log("📸 Image Metrics:", {
-      sizeKB: sizeInKB,
-      isBase64: imageData.includes("base64"),
-      format: imageData.substring(0, imageData.indexOf(";")) || "unknown",
-    });
-
-    const requestConfig = {
+    const response = await fetch(`${API_URL}/interpret-sign`, {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      timeout: 30000,
-      maxContentLength: 10 * 1024 * 1024,
-    };
-
-    console.log("📤 Sending request with config:", {
-      timeout: requestConfig.timeout,
-      maxContentLength: requestConfig.maxContentLength,
-      headers: requestConfig.headers,
+      body: JSON.stringify({
+        image: base64Image,
+        currentDateTime,
+      }),
     });
 
-    const response = await axios.post(
-      `${API_URL}/interpret-sign`,
-      { image: imageData },
-      requestConfig
-    );
-
-    if (!response.data?.success) {
-      console.error("📛 API Response not successful:", response.data);
-      throw new Error("Failed to get valid response from server");
-    }
-
-    console.log("✅ API Response received:", {
-      status: response.status,
-      hasInterpretation: !!response.data?.interpretation,
-      timestamp: response.data?.timestamp,
-    });
-
-    return response.data;
-  } catch (error) {
-    console.error("❌ API Error Details:", {
-      name: error.name,
-      message: error.message,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      responseData: error.response?.data,
-      isAxiosError: error.isAxiosError,
-      config: error.config,
-    });
-
-    // Throw user-friendly error messages
-    if (error.message.includes("Invalid image")) {
-      throw new Error(error.message);
-    } else if (error.response?.status === 413) {
-      throw new Error("Image is too large. Please try a smaller image.");
-    } else if (error.response?.status === 429) {
-      throw new Error("Too many requests. Please try again in a moment.");
-    } else if (error.code === "ECONNABORTED") {
-      throw new Error("Request timed out. Please try again.");
-    } else if (!navigator.onLine) {
-      throw new Error(
-        "No internet connection. Please check your connection and try again."
-      );
-    } else if (error.response?.data?.message) {
-      throw new Error(error.response.data.message);
-    } else {
+    if (!response.ok) {
       throw new Error(
         "Failed to interpret the parking sign. Please try again."
       );
     }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("API Error:", error);
+    throw new Error(
+      error.message || "Failed to interpret the parking sign. Please try again."
+    );
   }
 };

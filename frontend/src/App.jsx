@@ -7,6 +7,8 @@ import {
   XCircleIcon,
   PhotoIcon,
   CheckCircleIcon,
+  ClockIcon,
+  CalendarIcon,
 } from "@heroicons/react/24/solid";
 
 function App() {
@@ -218,6 +220,46 @@ function App() {
     );
   };
 
+  const CurrentDateTime = () => {
+    const [dateTime, setDateTime] = useState(new Date());
+
+    useEffect(() => {
+      const timer = setInterval(() => {
+        setDateTime(new Date());
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }, []);
+
+    const formattedDate = dateTime.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    const formattedTime = dateTime.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    return (
+      <div className="bg-white p-4 rounded-xl shadow-lg">
+        <div className="flex flex-col items-center space-y-2">
+          <div className="flex items-center text-gray-600 mb-1">
+            <CalendarIcon className="h-5 w-5 mr-2 text-blue-500" />
+            <span className="text-sm font-medium">{formattedDate}</span>
+          </div>
+          <div className="flex items-center text-gray-600">
+            <ClockIcon className="h-5 w-5 mr-2 text-blue-500" />
+            <span className="text-2xl font-semibold">{formattedTime}</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-gray-100">
       <div className="container mx-auto px-4 py-8">
@@ -235,13 +277,16 @@ function App() {
 
           <div className="space-y-6">
             {!capturedImage ? (
-              isMobile ? (
-                <MobileUpload />
-              ) : (
-                <div className="bg-white p-6 rounded-xl shadow-lg">
-                  <Camera onCapture={handleCapture} />
-                </div>
-              )
+              <>
+                {isMobile ? (
+                  <MobileUpload />
+                ) : (
+                  <div className="bg-white p-6 rounded-xl shadow-lg">
+                    <Camera onCapture={handleCapture} />
+                  </div>
+                )}
+                <CurrentDateTime />
+              </>
             ) : (
               <div className="space-y-6">
                 {!isMobile && (
