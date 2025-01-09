@@ -1,5 +1,5 @@
 const axios = require("axios");
-const { LLM_API_KEY, LLM_API_URL } = require("../config/env");
+const { LLM_API_KEY } = require("../config/env");
 
 const DAYS = [
   "Sunday",
@@ -22,19 +22,80 @@ class LLMService {
         dayOfWeek: DAYS[dayOfWeek],
       });
 
-      const systemPrompt = `You are a parking sign interpreter. Analyze the parking sign in the image and determine:
-1. If parking is currently allowed based on the current time: ${time} on ${DAYS[dayOfWeek]}, ${date}
-2. If parking is allowed, specify:
-   - How long can they park (maximum duration)
-   - Until what time they need to leave
-   - The parking cost/rate
-3. If parking is not allowed, explain why
+      const systemPrompt = `You are a parking sign interpreter. Analyze the parking sign in the image and provide a detailed interpretation.
+Current time context: ${time} on ${DAYS[dayOfWeek]}, ${date}
+
+Analyze and provide the following information in a structured format:
+
+1. Current Status:
+   - Is parking currently allowed?
+   - What are the current restrictions in effect?
+   - Current time period's rules
+
+2. Time Periods:
+   - List all time periods mentioned
+   - Rules for each period
+   - Special conditions (if any)
+
+3. Rates and Duration:
+   - Maximum parking duration
+   - Parking rates
+   - Time limits
+   - Meter information
+
+4. Special Rules:
+   - Holiday exceptions
+   - Permit holder rules
+   - Loading zone rules
+   - Street cleaning
+   - Special event restrictions
+
+5. Next Available Period:
+   - When parking will next be allowed
+   - Duration and rates for next period
+
 Format your response in JSON:
 {
-  "isAllowed": boolean,
-  "maxDuration": string or null,
-  "mustLeaveBy": string or null,
-  "parkingRate": string or null,
+  "currentStatus": {
+    "isAllowed": boolean,
+    "currentRestriction": string,
+    "timeRange": string
+  },
+  "timePeriods": {
+    "weekdays": [
+      {
+        "timeRange": string,
+        "rules": string[],
+        "isNoParking": boolean
+      }
+    ],
+    "weekends": [
+      {
+        "timeRange": string,
+        "rules": string[],
+        "isNoParking": boolean
+      }
+    ]
+  },
+  "parkingDetails": {
+    "maxDuration": string,
+    "mustLeaveBy": string,
+    "parkingRate": string,
+    "meterDetails": string
+  },
+  "specialRules": {
+    "holidays": string[],
+    "permits": string[],
+    "loadingZone": string,
+    "streetCleaning": string,
+    "specialEvents": string[]
+  },
+  "nextAvailable": {
+    "time": string,
+    "rules": string[],
+    "duration": string,
+    "rate": string
+  },
   "explanation": string
 }`;
 
@@ -61,7 +122,7 @@ Format your response in JSON:
               ],
             },
           ],
-          max_tokens: 500,
+          max_tokens: 1000,
           response_format: { type: "json_object" },
         },
         {
@@ -78,7 +139,13 @@ Format your response in JSON:
       const parsedResult = JSON.parse(result);
       console.log("✅ Parsed Result:", parsedResult);
 
-      return parsedResult;
+      return {
+        ...parsedResult,
+        isAllowed: parsedResult.currentStatus.isAllowed,
+        maxDuration: parsedResult.parkingDetails.maxDuration,
+        mustLeaveBy: parsedResult.parkingDetails.mustLeaveBy,
+        parkingRate: parsedResult.parkingDetails.parkingRate,
+      };
     } catch (error) {
       console.error("❌ LLM Service Error:", {
         message: error.message,
