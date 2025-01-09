@@ -82,8 +82,12 @@ function App() {
     const handleFileSelect = async (file) => {
       if (!file) return;
 
-      // Reset any previous errors
+      // Reset all states at the start
       setError(null);
+      setUploadStatus("uploading");
+      setCapturedImage(null);
+      setInterpretation(null);
+      setRequestTime(null);
 
       // Log detailed file information
       console.log("📱 Mobile Upload Details:", {
@@ -98,8 +102,6 @@ function App() {
         setUploadStatus("error");
         return;
       }
-
-      setUploadStatus("uploading");
 
       try {
         const reader = new FileReader();
