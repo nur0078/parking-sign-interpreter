@@ -1,218 +1,76 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
-import {
-  CameraIcon,
-  ArrowPathIcon,
-  MagnifyingGlassPlusIcon,
-  MagnifyingGlassMinusIcon,
-  SunIcon,
-  PhotoIcon,
-} from "@heroicons/react/24/solid";
 
-const Camera = ({ onCapture }) => {
+function Camera({ onCapture }) {
   const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const [stream, setStream] = useState(null);
-  const [isInitializing, setIsInitializing] = useState(true);
-  const [flashMode, setFlashMode] = useState("off");
-  const [zoomLevel, setZoomLevel] = useState(1);
-  const [showGuide, setShowGuide] = useState(true);
-  const [facingMode, setFacingMode] = useState("environment");
+  const streamRef = useRef(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    initializeCamera();
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
+    const initializeCamera = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+        });
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          setIsInitialized(true);
+        }
+      } catch (error) {
+        console.error("Error accessing camera:", error);
       }
     };
-  }, [facingMode]);
 
-  const initializeCamera = async () => {
-    try {
-      const constraints = {
-        video: {
-          facingMode,
-          advanced: [
-            { zoom: zoomLevel },
-            { brightness: { ideal: 100 } },
-            { focusMode: "continuous" },
-          ],
-        },
-      };
+    initializeCamera();
 
-      const mediaStream = await navigator.mediaDevices.getUserMedia(
-        constraints
-      );
-      setStream(mediaStream);
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        await videoRef.current.play();
-        setIsInitializing(false);
+    // Cleanup function to stop the camera when component unmounts
+    return () => {
+      if (streamRef.current) {
+        const tracks = streamRef.current.getTracks();
+        tracks.forEach((track) => track.stop());
+        streamRef.current = null;
       }
-    } catch (error) {
-      console.error("Error accessing camera:", error);
-      setIsInitializing(false);
-    }
-  };
+    };
+  }, []); // Empty dependency array means this runs once on mount
 
   const handleCapture = () => {
-    if (!canvasRef.current || !videoRef.current) return;
+    if (!videoRef.current || !isInitialized) return;
 
-    const canvas = canvasRef.current;
-    const video = videoRef.current;
+    const canvas = document.createElement("canvas");
+    canvas.width = videoRef.current.videoWidth;
+    canvas.height = videoRef.current.videoHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(videoRef.current, 0, 0);
+    const imageData = canvas.toDataURL("image/jpeg");
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
+    // Stop the camera stream after capturing
+    if (streamRef.current) {
+      const tracks = streamRef.current.getTracks();
+      tracks.forEach((track) => track.stop());
+      streamRef.current = null;
+    }
 
-    const context = canvas.getContext("2d");
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    const imageData = canvas.toDataURL("image/jpeg", 0.8);
     onCapture(imageData);
-  };
-
-  const toggleFlash = () => {
-    if (!stream) return;
-    const track = stream.getVideoTracks()[0];
-    const capabilities = track.getCapabilities();
-
-    if (capabilities.torch) {
-      const newMode = flashMode === "off" ? "on" : "off";
-      track.applyConstraints({
-        advanced: [{ torch: newMode === "on" }],
-      });
-      setFlashMode(newMode);
-    }
-  };
-
-  const adjustZoom = (increment) => {
-    const newZoom = Math.max(1, Math.min(5, zoomLevel + increment));
-    setZoomLevel(newZoom);
-
-    if (stream) {
-      const track = stream.getVideoTracks()[0];
-      track.applyConstraints({
-        advanced: [{ zoom: newZoom }],
-      });
-    }
-  };
-
-  const toggleCamera = () => {
-    setFacingMode((prev) => (prev === "environment" ? "user" : "environment"));
   };
 
   return (
     <div className="relative">
-      {/* Camera Preview */}
-      <div className="relative aspect-[3/4] max-w-md mx-auto overflow-hidden rounded-lg">
-        <video
-          ref={videoRef}
-          className="w-full h-full object-cover"
-          playsInline
-          autoPlay
-          muted
-        />
-
-        {/* Grid Overlay */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="w-full h-full grid grid-cols-3 grid-rows-3">
-            {[...Array(9)].map((_, i) => (
-              <div key={i} className="border border-white/20" />
-            ))}
-          </div>
-        </div>
-
-        {/* Capture Guide */}
-        {showGuide && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white p-4">
-            <div className="text-center max-w-xs">
-              <h3 className="font-bold mb-2">Capture Tips</h3>
-              <ul className="text-sm space-y-2">
-                <li>• Center the parking sign in frame</li>
-                <li>• Ensure good lighting</li>
-                <li>• Hold steady and parallel to sign</li>
-                <li>• Include all text clearly</li>
-              </ul>
-              <button
-                onClick={() => setShowGuide(false)}
-                className="mt-4 bg-white/20 px-4 py-2 rounded-full text-sm"
-              >
-                Got it
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Loading State */}
-        {isInitializing && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-          </div>
-        )}
-      </div>
-
-      {/* Controls */}
-      <div className="mt-4 flex items-center justify-center space-x-4">
-        <button
-          onClick={() => adjustZoom(-0.5)}
-          className="p-2 rounded-full bg-gray-800 text-white"
-          title="Zoom Out"
-        >
-          <MagnifyingGlassMinusIcon className="h-6 w-6" />
-        </button>
-
-        <button
-          onClick={handleCapture}
-          className="p-4 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors"
-          title="Take Photo"
-        >
-          <CameraIcon className="h-8 w-8" />
-        </button>
-
-        <button
-          onClick={() => adjustZoom(0.5)}
-          className="p-2 rounded-full bg-gray-800 text-white"
-          title="Zoom In"
-        >
-          <MagnifyingGlassPlusIcon className="h-6 w-6" />
-        </button>
-      </div>
-
-      {/* Secondary Controls */}
-      <div className="mt-4 flex items-center justify-center space-x-4">
-        <button
-          onClick={toggleFlash}
-          className={`p-2 rounded-full ${
-            flashMode === "on" ? "bg-yellow-500" : "bg-gray-800"
-          } text-white`}
-          title="Toggle Flash"
-        >
-          <SunIcon className="h-5 w-5" />
-        </button>
-
-        <button
-          onClick={toggleCamera}
-          className="p-2 rounded-full bg-gray-800 text-white"
-          title="Switch Camera"
-        >
-          <ArrowPathIcon className="h-5 w-5" />
-        </button>
-
-        <button
-          onClick={() => setShowGuide(true)}
-          className="p-2 rounded-full bg-gray-800 text-white"
-          title="Show Guide"
-        >
-          <PhotoIcon className="h-5 w-5" />
-        </button>
-      </div>
-
-      <canvas ref={canvasRef} className="hidden" />
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        className="w-full rounded-lg"
+      />
+      <button
+        onClick={handleCapture}
+        className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300 shadow-md"
+      >
+        Take Photo
+      </button>
     </div>
   );
-};
+}
 
 Camera.propTypes = {
   onCapture: PropTypes.func.isRequired,

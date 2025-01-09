@@ -244,69 +244,71 @@ function App() {
           <p className="text-gray-600 mb-6">
             Take a photo of any parking sign to instantly understand the rules
           </p>
-          {!isMobile && (
+          {/* Test mode button commented out for now */}
+          {/* {!isMobile && (
             <button
               onClick={() => setShowTest(!showTest)}
               className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300 shadow-md"
             >
               {showTest ? "Use Camera" : "Test with Upload"}
             </button>
-          )}
+          )} */}
         </header>
 
         {/* Main Content */}
         <main className="max-w-4xl mx-auto">
           {error && <ErrorMessage message={error} />}
 
-          {!isMobile && showTest ? (
+          {/* Test upload component commented out */}
+          {/* {!isMobile && showTest ? (
             <TestUpload />
-          ) : (
-            <div className="space-y-6">
-              {!capturedImage ? (
-                isMobile ? (
-                  <MobileUpload />
-                ) : (
-                  <div className="bg-white p-6 rounded-xl shadow-lg">
-                    <Camera onCapture={handleCapture} />
-                  </div>
-                )
+          ) : ( */}
+          <div className="space-y-6">
+            {!capturedImage ? (
+              isMobile ? (
+                <MobileUpload />
               ) : (
-                <div className="space-y-6">
-                  {!isMobile && (
-                    <div className="bg-white p-4 rounded-xl shadow-lg">
-                      <img
-                        src={capturedImage}
-                        alt="Captured parking sign"
-                        className="max-w-md mx-auto rounded-lg"
-                      />
-                    </div>
-                  )}
-
-                  {isLoading ? (
-                    <div className="text-center py-8">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                      <p className="text-gray-600">Interpreting sign...</p>
-                    </div>
-                  ) : (
-                    <>
-                      <ParkingStatus
-                        interpretation={interpretation}
-                        requestTime={requestTime}
-                      />
-                      <div className="text-center">
-                        <button
-                          onClick={handleReset}
-                          className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300 shadow-md"
-                        >
-                          Scan Another Sign
-                        </button>
-                      </div>
-                    </>
-                  )}
+                <div className="bg-white p-6 rounded-xl shadow-lg">
+                  <Camera onCapture={handleCapture} />
                 </div>
-              )}
-            </div>
-          )}
+              )
+            ) : (
+              <div className="space-y-6">
+                {!isMobile && (
+                  <div className="bg-white p-4 rounded-xl shadow-lg">
+                    <img
+                      src={capturedImage}
+                      alt="Captured parking sign"
+                      className="max-w-md mx-auto rounded-lg"
+                    />
+                  </div>
+                )}
+
+                {isLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Interpreting sign...</p>
+                  </div>
+                ) : (
+                  <>
+                    <ParkingStatus
+                      interpretation={interpretation}
+                      requestTime={requestTime}
+                    />
+                    <div className="text-center">
+                      <button
+                        onClick={handleReset}
+                        className="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300 shadow-md"
+                      >
+                        Scan Another Sign
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+          {/* )} */}
         </main>
 
         {/* Footer */}
