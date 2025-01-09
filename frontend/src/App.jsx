@@ -82,12 +82,8 @@ function App() {
     const handleFileSelect = async (file) => {
       if (!file) return;
 
-      // Reset all states at the start
+      // Reset any previous errors
       setError(null);
-      setUploadStatus("uploading");
-      setCapturedImage(null);
-      setInterpretation(null);
-      setRequestTime(null);
 
       // Log detailed file information
       console.log("📱 Mobile Upload Details:", {
@@ -103,10 +99,16 @@ function App() {
         return;
       }
 
+      setUploadStatus("uploading");
+
       try {
         const reader = new FileReader();
+        let isProcessing = false; // Add flag to prevent double processing
 
         reader.onloadend = async () => {
+          if (isProcessing) return; // Skip if already processing
+          isProcessing = true;
+
           const base64Data = reader.result;
           console.log("📸 Image Format Check:", {
             startsWithImage: base64Data.startsWith("data:image/"),
